@@ -2,6 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
+app.set('port', process.env.PORT || 8080);
+
 router.post("/", (req, res) => {
   // Read variables sent via POST from our SDK
   const { sessionId, serviceCode, phoneNumber, text } = req.body;
@@ -46,3 +48,7 @@ router.post("/", (req, res) => {
 });
 
 module.exports = router;
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
