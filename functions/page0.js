@@ -27,11 +27,36 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
           text_array = text.split(',');
           uname = text[0]
           password = crypto.encrypt(text_array[1])
-          auth_fns.create.createNewAccount(fs, db, phoneNumber, text_array, password, web3, sessionId, res)        
+          auth_fns.create.createNewAccount(fs, db, phoneNumber, text_array, password, web3, sessionId, res)
 
           break;
 
         case 2:
+          text_array = text.split('*');
+          //Check to ensure that the user is logged in
+          if (text_array[1] === "1") {
+            //user wishes to view claims
+            db.collection("sessions").doc(sessionId).delete().then(() => {
+              console.log("Document successfully deleted!");
+            }).catch((error) => {
+              console.error("Error removing document: ", error);
+            });
+            response = "END You Currently Have No Validated Claims"
+            res.set("Content-Type: text/plain");
+            res.send(response);
+          }
+          else if (text_array[1] === "2") {
+            //user wishes to make a claim
+            var response = `CON What Claim Would You Like to Make\n
+                        1. National ID Number
+                        2. Age
+                        3. Driver Status
+                        4. Covid-19 Vaccination Status`
+            updateSession(db, sessionId, 5)
+            res.set("Content-Type: text/plain");
+            res.send(response);
+
+          }
 
           break;
 
@@ -44,6 +69,14 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
           break;
 
         case 5:
+          db.collection("sessions").doc(sessionId).delete().then(() => {
+            console.log("Document successfully deleted!");
+          }).catch((error) => {
+            console.error("Error removing document: ", error);
+          });
+          response = "END WIP"
+          res.set("Content-Type: text/plain");
+          res.send(response);          
 
           break;
 
@@ -54,14 +87,14 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
     } else {
       // doc.data() will be undefined in this case
       //This is the first request for this session we must create a session document in the database then ask to login or create account
-      checkUserExists(db, phoneNumber,sessionId,phoneNumber, res);
+      checkUserExists(db, phoneNumber, sessionId, phoneNumber, res);
     }
   }).catch((error) => {
     console.log("Error getting document:", error);
   });
 }
 
-function checkUserExists(db, phone,sessionId,phoneNumber, res) {
+function checkUserExists(db, phone, sessionId, phoneNumber, res) {
   var docRef = db.collection("users").doc(phone);
 
   return docRef.get().then(function (doc) {
@@ -82,7 +115,7 @@ function checkUserExists(db, phone,sessionId,phoneNumber, res) {
           message = "Error occured!";
           console.error("Error writing document: ", error);
         });
-      var response = `Welcome Back ${data.name} please enter your pin`;
+      var response = `CON Welcome Back ${data.name} please enter your pin`;
       res.set("Content-Type: text/plain");
       res.send(response);
 
@@ -102,7 +135,7 @@ function checkUserExists(db, phone,sessionId,phoneNumber, res) {
           message = "Error occured!";
           console.error("Error writing document: ", error);
         });
-      var response = `Welcome please enter your name followed by your desired pin separated by a comma\ne.g. John, 12345678`;
+      var response = `CON Welcome please enter your name followed by your desired pin separated by a comma\ne.g. John, 12345678`;
       res.set("Content-Type: text/plain");
       res.send(response);
       return
@@ -110,6 +143,21 @@ function checkUserExists(db, phone,sessionId,phoneNumber, res) {
   }).catch((error) => {
     console.log("Error getting document:", error);
   });
+}
+
+
+function updateSession(db, sessionId, lastPage) {
+  db.collection("sessions").doc(sessionId).set({
+    page: lastPage
+  })
+    .then(() => {
+      console.log('Last Page Updated Successfully')
+      //check if account exists already;
+    })
+    .catch((error) => {
+      message = "Error occured!";
+      console.error("Error writing document: ", error);
+    });
 }
 
 exports.checkSession = checkSession;

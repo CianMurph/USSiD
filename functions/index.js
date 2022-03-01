@@ -32,8 +32,9 @@ function appInit() {
     //Read the variables sent via POST from our API
     const { sessionId, serviceCode, phoneNumber, text } = req.body;
     const phoneNumberHash = crypto.hash(phoneNumber);
+    sessionIdStr = sessionId.toString();
     //TODO Check Database SessionID Collection to see if entry exists corresponding to current session
-    pageManager.checkSession(fs, db, sessionId, serviceCode, phoneNumberHash, text, res)
+    pageManager.checkSession(fs, db, sessionIdStr, serviceCode, phoneNumberHash, text, res)
     
   });
   //
