@@ -27,7 +27,7 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
           text_array = text.split(',');
           uname = text[0]
           password = crypto.encrypt(text_array[1])
-          auth_fns.create.createNewAccount(fs, db, phoneNumber, text_array, password, web3, sessionId, res)
+          auth_fns.create.createNewAccount(fs, db, phoneNumber, text_array, password, web3, serviceCode, sessionId, res)
 
           break;
 
@@ -87,6 +87,7 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
     } else {
       // doc.data() will be undefined in this case
       //This is the first request for this session we must create a session document in the database then ask to login or create account
+      console.log(serviceCode)
       checkUserExists(db, phoneNumber, sessionId, phoneNumber, res);
     }
   }).catch((error) => {

@@ -1,6 +1,6 @@
 const crypto = require('./../crypto');
 
-async function signIn(firebase, db, phone, password, res, sessionId) {
+async function signIn(firebase, db, phone, password, res, serviceCode, sessionId) {
 
   var docRef = db.collection("users").doc(phone);
   var uid = phone;
@@ -11,46 +11,93 @@ async function signIn(firebase, db, phone, password, res, sessionId) {
     if (doc.exists) {
       //console.log("Document data:", doc.data());
       user_data = doc.data();
-      if (crypto.decrypt(password) === crypto.decrypt(user_data.password)) {
-        console.log('Passwords Match')
-        firebase.auth().createCustomToken(uid)
-          .then(function (customToken) {
-            console.log(customToken)
+      if (serviceCode === '*384*25924#') {
+        
+        console.log('service code for user')
+        if (crypto.decrypt(password) === crypto.decrypt(user_data.password)) {
+          console.log('Passwords Match')
+          firebase.auth().createCustomToken(uid)
+            .then(function (customToken) {
+              console.log(customToken)
 
-            db.collection("sessions").doc(sessionId).set({
-              phone: phone,
-              token: customToken,
-              page: 2
-            })
-              .then(() => {
-                message = "Session Document successfully written!";
-                //check if account exists already;
+              db.collection("sessions").doc(sessionId).set({
+                phone: phone,
+                token: customToken,
+                //conditional page set to 8 if service code for verification
+                page: 2
               })
-              .catch((error) => {
-                message = "Error occured!";
-                console.error("Error writing document: ", error);
-              });
-            response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Make Claim`
-            res.set("Content-Type: text/plain");
-            res.send(response);
-          })
+                .then(() => {
+                  message = "Session Document successfully written!";
+                  //check if account exists already;
+                })
+                .catch((error) => {
+                  message = "Error occured!";
+                  console.error("Error writing document: ", error);
+                });
+              response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Make Claim`
+              res.set("Content-Type: text/plain");
+              res.send(response);
+            })
 
-          .catch(function (error) {
-            console.log("Error creating custom token:", error);
+            .catch(function (error) {
+              console.log("Error creating custom token:", error);
+            });
+        }
+        else {
+          console.log('Incorrect Pin')
+          db.collection("sessions").doc(sessionId).delete().then(() => {
+            console.log("Document successfully deleted!");
+          }).catch((error) => {
+            console.error("Error removing document: ", error);
           });
+          response = "END Incorrect Pin Please try again";
+          res.set("Content-Type: text/plain");
+          res.send(response);
+        }
       }
-      else {
-        console.log('Incorrect Pin')
-        db.collection("sessions").doc(sessionId).delete().then(() => {
-          console.log("Document successfully deleted!");
-        }).catch((error) => {
-          console.error("Error removing document: ", error);
-        });
-        response = "END Incorrect Pin Please try again";
-        res.set("Content-Type: text/plain");
-        res.send(response);
-      }
+      else if (serviceCode === '*384*13364#') {
+        console.log('service code for checking')
+        if (crypto.decrypt(password) === crypto.decrypt(user_data.password)) {
+          console.log('Passwords Match')
+          firebase.auth().createCustomToken(uid)
+            .then(function (customToken) {
+              console.log(customToken)
 
+              db.collection("sessions").doc(sessionId).set({
+                phone: phone,
+                token: customToken,
+                //conditional page set to 8 if service code for verification
+                page: 8
+              })
+                .then(() => {
+                  message = "Session Document successfully written!";
+                  //check if account exists already;
+                })
+                .catch((error) => {
+                  message = "Error occured!";
+                  console.error("Error writing document: ", error);
+                });
+              response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Make Claim`
+              res.set("Content-Type: text/plain");
+              res.send(response);
+            })
+
+            .catch(function (error) {
+              console.log("Error creating custom token:", error);
+            });
+        }
+        else {
+          console.log('Incorrect Pin')
+          db.collection("sessions").doc(sessionId).delete().then(() => {
+            console.log("Document successfully deleted!");
+          }).catch((error) => {
+            console.error("Error removing document: ", error);
+          });
+          response = "END Incorrect Pin Please try again";
+          res.set("Content-Type: text/plain");
+          res.send(response);
+        }
+      }
     } else {
       // doc.data() will be undefined in this case
       console.log(`Cannot Find User`)

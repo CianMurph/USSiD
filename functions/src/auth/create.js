@@ -1,8 +1,11 @@
 const { response } = require("express");
 
-function createNewAccount(firebase, db, phone, text, password, web3, sessionId, res) {
+function createNewAccount(firebase, db, phone, text, password, web3, serviceCode, sessionId) {
     var web3Account = web3.eth.accounts.create()
     web3Account = web3.eth.accounts.encrypt(web3Account.privateKey, text[1])
+
+    //Create instance in public collection also
+
     db.collection("users").doc(phone).set({
         name: text[0],
         password: password,
