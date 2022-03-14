@@ -1,6 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const solc = require('solc');
-const helloPath = path.resolve(__dirname, 'contracts', 'hello.sol');
-const source = fs.readFileSync(helloPath, 'UTF-8');
-module.exports = solc.compile(source, 1).contracts[':Hello'];
+const identityPath = path.resolve(__dirname,'src', 'contracts', 'Identity.sol');
+const claimIssuerPath = path.resolve(__dirname, 'src', 'contracts', 'ClaimIssuer.sol');
+const identitySource = fs.readFileSync(identityPath, 'UTF-8');
+const claimIssuerSource = fs.readFileSync(claimIssuerPath, 'UTF-8')
+exports.identity = solc.compile(identitySource, 1).contracts[':Identity'];
+exports.claimIssuer = solc.compile(claimIssuerSource, 1).contracts[':Identity'];
