@@ -1,0 +1,71 @@
+[
+    {
+        "address": "0x04DEd901668676Eb768b73CfB0eA297700764dfa",
+        "privateKey": "0x41162f19643eba3569d99be7ce540d8d0dd7d6d74da6c3bd130d6d8325bb531f",
+        "taken": false,
+        "index": 0
+    },
+
+    {
+        "address": "0xB7B31a82cBF06E8e8188f7D41581fd114AE922A4",
+        "privateKey": "0xd8199c404d24b6a97261c335c43a8670d920b489f52fd3d2787f63e35bb72598",
+        "taken": false,
+        "index": 1
+    },
+
+    {
+        "address": "0x210EE7Eb51cCaC72E4dF687F515d529c72485b2E",
+        "privateKey": "0xea9851958542bd0667c5d1bbabd7daaf069915f568feadf4bb1caa05e0df1f3e",
+        "taken": false,
+        "index": 2
+    },
+
+    {
+        "address": "0xEc2A219f27260f7798Bf9db76eE03cc977094f6c",
+        "privateKey": "0xcd2f3caf04f88a32c6d66878b302437376b12c6d10f12578a5b67b116d5452ad",
+        "taken": false,
+        "index": 3
+    },
+
+    {
+        "address": "0xf80B0a967DF79A3E519831D2D1FDC23ff25E4b78",
+        "privateKey": "0xbca3ab25b339df850b9469fe7e8be016618a4ce6a8e9cd4b29107a23515d0930",
+        "taken": false,
+        "index": 4
+    },
+
+    {
+        "address": "0xA9fb0aFf31386B1eC9E0Ba3346161B59963d1861",
+        "privateKey": "0xd0abaff7bb766a2fa3a63039d3a580af821406e59b33f91070e81424be402e83",
+        "taken": false,
+        "index": 5
+    },
+
+    {
+        "address": "0x4863270Bf838195CD3689be39de2b963eFC59D60",
+        "privateKey": "0x85e12211c67cdb77d12dfc7aa79a969826f1371ee48edeb9f3c2a7d6e21d075f",
+        "taken": false,
+        "index": 6
+    },
+
+    {
+        "address": "0xCC48033822EcaB1327D2Ca84539689E95d2eCb1B",
+        "privateKey": "0xcc2abbd8011fa6e006d714b4fe8121ff1aec43768382be52321810cd1b3103af",
+        "taken": false,
+        "index": 7
+    },
+
+    {
+        "address": "0x58e11ab42550Ef2149e9499452c1E75f96c1AB10",
+        "privateKey": "0x029a0d042fd503f7b097fb2134e5744f3a0b359153e3108e898160f4d3ded2c6",
+        "taken": false,
+        "index": 8
+    },
+
+    {
+        "address": "0x53Db038A160AD67bE0bd16287A6d4fDcB26d22C1",
+        "privateKey": "0x24fe0b2116b4846b05bdaf612b2428984b734126f2e39d6806435d6e378b04a6",
+        "taken": false,
+        "index": 9
+    }
+]

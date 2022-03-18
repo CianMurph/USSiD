@@ -1,10 +1,10 @@
-const { response } = require('express');
+const identity = require('./src/actions/identity')
 const auth_fns = require('./src/auth');
 const crypto = require('./src/crypto');
-const Web3 = require('web3')
-const web3 = new Web3('https://rpc.l14.lukso.network');
+const Web3 = require('web3');
+const web3 = new Web3('HTTP://127.0.0.1:7545');
 
-function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
+async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
   var sessionRef = db.collection("sessions").doc(sessionId);
 
   sessionRef.get().then(function (doc) {
@@ -36,23 +36,28 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
           //Check to ensure that the user is logged in
           if (text_array[1] === "1") {
             //user wishes to view claims
-            db.collection("sessions").doc(sessionId).delete().then(() => {
-              console.log("Document successfully deleted!");
-            }).catch((error) => {
-              console.error("Error removing document: ", error);
-            });
-            response = "END You Currently Have No Validated Claims"
+            var response = `CON What Type of Claim Would You Like to View\n
+            1. Name
+            2. National ID Number
+            3. Age
+            4. Driver Status
+            5. Covid-19 Vaccination Status
+            6. Passport`
+            updateSession(db, sessionId, 3)
             res.set("Content-Type: text/plain");
             res.send(response);
+
           }
           else if (text_array[1] === "2") {
             //user wishes to make a claim
-            var response = `CON What Claim Would You Like to Make\n
-                        1. National ID Number
-                        2. Age
-                        3. Driver Status
-                        4. Covid-19 Vaccination Status`
-            updateSession(db, sessionId, 5)
+            var response = `CON Who Would you like to present the claim to (enter phone number)\n
+                        1. Name\n
+                        2. National ID Number\n
+                        3. Age\n
+                        4. Driver Status\n
+                        5. Covid-19 Vaccination Status\n
+                        6. Passport`
+            updateSession(db, sessionId, 4)
             res.set("Content-Type: text/plain");
             res.send(response);
 
@@ -61,27 +66,112 @@ function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
           break;
 
         case 3:
+          //User has just selected to view their existing claims
+          text_array = text.split('*');
+          var docRef = db.collection("users").doc(phoneNumber);
+          docRef.get().then(function (doc) {
+            console.log(phoneNumber)
+            userData = doc.data();
+            web3Account = userData.account;
+            idContract = userData.idContractAddress;
+            console.log(web3Account)
+            web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
+            console.log(web3Account)
+            signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
+            web3.eth.accounts.wallet.add(signer)
+            switch (text_array[2]) {
+              case "1":
+                //user wants claims on name
+                viewClaimsByTopic(web3, 1, idContract, signer)
+                break;
+              case "2":
+                //user wants claims on age
+                viewClaimsByTopic(web3, 2, idContract, signer)
+                break;
+              case "3":
+                //user wants claims on nationalId
+                viewClaimsByTopic(web3, 3, idContract, signer)
+                break;
+              case "4":
+                //user wants claims on driversLicense
+                viewClaimsByTopic(web3, 4, idContract, signer)
+                break;
+              case "5":
+                //user wants claims on Covid Vaccination
+                viewClaimsByTopic(web3, 5, idContract, signer)
 
+                break;
+              case "6":
+                //user wants claims on Passport
+                viewClaimsByTopic(web3, 6, idContract, signer)
+                break;
+            }
+          });
           break;
 
         case 4:
+          var response = `CON What Type of Claim Would You Like to Present\n
+            1. Name
+            2. National ID Number
+            3. Age
+            4. Driver Status
+            5. Covid-19 Vaccination Status
+            6. Passport`
+          updateSession(db, sessionId, 5)
+          res.set("Content-Type: text/plain");
+          res.send(response);
+
+
 
           break;
 
         case 5:
-          db.collection("sessions").doc(sessionId).delete().then(() => {
-            console.log("Document successfully deleted!");
-          }).catch((error) => {
-            console.error("Error removing document: ", error);
-          });
-          response = "END WIP"
-          res.set("Content-Type: text/plain");
-          res.send(response);          
+          //User has just selected to view their existing claims
+          text_array = text.split('*');
+          var docRef = db.collection("users").doc(phoneNumber);
+          docRef.get().then(function (doc) {
+            console.log(phoneNumber)
+            userData = doc.data();
+            web3Account = userData.account;
+            idContract = userData.idContractAddress;
+            console.log(web3Account)
+            web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
+            console.log(web3Account)
+            signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
+            web3.eth.accounts.wallet.add(signer)
+            switch (text_array[2]) {
+              case "1":
+                //user wants claims on name
+                selectClaimsToPresent(web3, 1, idContract, signer, db, sessionId, 6)
+                break;
+              case "2":
+                //user wants claims on age
+                selectClaimsToPresent(web3, 2, idContract, signer, db, sessionId, 6)
+                break;
+              case "3":
+                //user wants claims on nationalId
+                selectClaimsToPresent(web3, 3, idContract, signer, db, sessionId, 6)
+                break;
+              case "4":
+                //user wants claims on driversLicense
+                selectClaimsToPresent(web3, 4, idContract, signer, db, sessionId, 6)
+                break;
+              case "5":
+                //user wants claims on Covid Vaccination
+                selectClaimsToPresent(web3, 5, idContract, signer, db, sessionId, 6)
 
+                break;
+              case "6":
+                //user wants claims on Passport
+                selectClaimsToPresent(web3, 6, idContract, signer, db, sessionId, 6)
+                break;
+            }
+          });
           break;
 
         case 6:
-
+          //check received string to determine which claim to get
+          //add phoneNumber hash and claimId to list of claimsToCheck on Verifier Account
           break;
       }
     } else {
@@ -160,5 +250,63 @@ function updateSession(db, sessionId, lastPage) {
       console.error("Error writing document: ", error);
     });
 }
+
+async function viewClaimsByTopic(web3, topic, idContract, signer) {
+  identity.getClaimsByTopic(web3, topic, idContract, signer).then(async function (claims) {
+    response = `END`
+    if (claims.length == 0) {
+      db.collection("sessions").doc(sessionId).delete().then(() => {
+        console.log("Document successfully deleted!");
+      }).catch((error) => {
+        console.error("Error removing document: ", error);
+      });
+      response = `END There are no claims of this type on your ID`
+      res.set("Content-Type: text/plain");
+      res.send(response);
+    }
+    for (i = 0; i < claims.length; i++) {
+      claim = await identity.getClaim(web3, claims[i], idContract, signer);
+      response = response + `${i + 1}: ${web3.utils.hexToAscii(claim.data)}\n`
+      console.log(response)
+
+    }
+    db.collection("sessions").doc(sessionId).delete().then(() => {
+      console.log("Document successfully deleted!");
+    }).catch((error) => {
+      console.error("Error removing document: ", error);
+    });
+    res.set("Content-Type: text/plain");
+    res.send(response);
+  })
+}
+
+async function selectClaimsToPresent(db, web3, topic, idContract, signer) {
+  identity.getClaimsByTopic(web3, topic, idContract, signer).then(async function (claims) {
+    response = `CON Select The Claim You Wish To Present`
+    if (claims.length == 0) {
+      db.collection("sessions").doc(sessionId).delete().then(() => {
+        console.log("Document successfully deleted!");
+      }).catch((error) => {
+        console.error("Error removing document: ", error);
+      });
+      response = `END There are no claims of this type on your ID`
+      res.set("Content-Type: text/plain");
+      res.send(response)
+    }
+    for (i = 0; i < claims.length; i++) {
+      claim = await identity.getClaim(web3, claims[i], idContract, signer);
+      response = response + `${i + 1}: ${web3.utils.hexToAscii(claim.data)}\n`
+      console.log(response)
+    }
+    db.collection("sessions").doc(sessionId).delete().then(() => {
+      console.log("Document successfully deleted!");
+    }).catch((error) => {
+      console.error("Error removing document: ", error);
+    });
+    res.set("Content-Type: text/plain");
+    res.send(response);
+  })
+}
+
 
 exports.checkSession = checkSession;
