@@ -34,34 +34,33 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
         case 2:
           text_array = text.split('*');
           //Check to ensure that the user is logged in
-          if (text_array[1] === "1") {
-            //user wishes to view claims
-            var response = `CON What Type of Claim Would You Like to View\n
-            1. Name
+          switch (text_array[1]) {
+            case "1":
+              var response = `CON What Type of Claim Would You Like to View\n`
+              var nextPage = 3;
+              break;
+            case "2":
+              var response = `CON What Type of Claim Would You Like to Present\n`
+              var nextPage = 4;
+              break;
+            case "3":
+              var response = `CON What Type of Claim Would You Like to Make\n`
+              var nextPage = 6;
+              break;
+            case "4":
+              var response = `CON What Type of Claim Would You Like to Remove\n`
+              var nextPage = 7;
+              break;
+          }
+          response = response + `1. Name
             2. National ID Number
             3. Age
             4. Driver Status
             5. Covid-19 Vaccination Status
             6. Passport`
-            updateSession(db, sessionId, 3)
-            res.set("Content-Type: text/plain");
-            res.send(response);
-
-          }
-          else if (text_array[1] === "2") {
-            //user wishes to make a claim
-            var response = `CON Who Would you like to present the claim to (enter phone number)\n
-                        1. Name\n
-                        2. National ID Number\n
-                        3. Age\n
-                        4. Driver Status\n
-                        5. Covid-19 Vaccination Status\n
-                        6. Passport`
-            updateSession(db, sessionId, 4)
-            res.set("Content-Type: text/plain");
-            res.send(response);
-
-          }
+          updateSession(db, sessionId, nextPage);
+          res.set("Content-Type: text/plain");
+          res.send(response);
 
           break;
 
@@ -82,51 +81,36 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
             switch (text_array[2]) {
               case "1":
                 //user wants claims on name
-                viewClaimsByTopic(web3, 1, idContract, signer)
+                viewClaimsByTopic(db, sessionId, web3, 1, idContract, signer, res)
                 break;
               case "2":
                 //user wants claims on age
-                viewClaimsByTopic(web3, 2, idContract, signer)
+                viewClaimsByTopic(db, sessionId, web3, 2, idContract, signer, res)
                 break;
               case "3":
                 //user wants claims on nationalId
-                viewClaimsByTopic(web3, 3, idContract, signer)
+                viewClaimsByTopic(db, sessionId, web3, 3, idContract, signer, res)
                 break;
               case "4":
                 //user wants claims on driversLicense
-                viewClaimsByTopic(web3, 4, idContract, signer)
+                viewClaimsByTopic(db, sessionId, web3, 4, idContract, signer, res)
                 break;
               case "5":
                 //user wants claims on Covid Vaccination
-                viewClaimsByTopic(web3, 5, idContract, signer)
+                viewClaimsByTopic(db, sessionId, web3, 5, idContract, signer, res)
 
                 break;
               case "6":
                 //user wants claims on Passport
-                viewClaimsByTopic(web3, 6, idContract, signer)
+                viewClaimsByTopic(db, sessionId, web3, 6, idContract, signer, res)
                 break;
             }
           });
           break;
 
         case 4:
-          var response = `CON What Type of Claim Would You Like to Present\n
-            1. Name
-            2. National ID Number
-            3. Age
-            4. Driver Status
-            5. Covid-19 Vaccination Status
-            6. Passport`
-          updateSession(db, sessionId, 5)
-          res.set("Content-Type: text/plain");
-          res.send(response);
-
-
-
-          break;
-
-        case 5:
-          //User has just selected to view their existing claims
+          //User has just selected to present claim
+          //return list of existing claims within chosen category
           text_array = text.split('*');
           var docRef = db.collection("users").doc(phoneNumber);
           docRef.get().then(function (doc) {
@@ -142,37 +126,145 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
             switch (text_array[2]) {
               case "1":
                 //user wants claims on name
-                selectClaimsToPresent(web3, 1, idContract, signer, db, sessionId, 6)
+                //selectClaimsToPresent(db, sessionId, web3, topic, idContract, signer, res) 
+                selectClaimsToPresent(db, sessionId, web3, 1, idContract, signer, res)
                 break;
               case "2":
                 //user wants claims on age
-                selectClaimsToPresent(web3, 2, idContract, signer, db, sessionId, 6)
+                selectClaimsToPresent(db, sessionId, web3, 2, idContract, signer, res)
                 break;
               case "3":
                 //user wants claims on nationalId
-                selectClaimsToPresent(web3, 3, idContract, signer, db, sessionId, 6)
+                selectClaimsToPresent(db, sessionId, web3, 3, idContract, signer, res)
                 break;
               case "4":
                 //user wants claims on driversLicense
-                selectClaimsToPresent(web3, 4, idContract, signer, db, sessionId, 6)
+                selectClaimsToPresent(db, sessionId, web3, 4, idContract, signer, res)
                 break;
               case "5":
                 //user wants claims on Covid Vaccination
-                selectClaimsToPresent(web3, 5, idContract, signer, db, sessionId, 6)
+                selectClaimsToPresent(db, sessionId, web3, 5, idContract, signer, res)
 
                 break;
               case "6":
                 //user wants claims on Passport
-                selectClaimsToPresent(web3, 6, idContract, signer, db, sessionId, 6)
+                selectClaimsToPresent(db, sessionId, web3, 6, idContract, signer, res)
                 break;
             }
           });
+
+
+
+          break;
+
+        case 5:
+          //list claims within chosen topic and handle input
+          //text[0] = pin
+          //text[1] = initial choice(present, view etc...)
+          //text[2] = choice of claim type
+          //text[3] = claim index + 1
+          text_array = text.split('*');
+          claimType = parseInt(text_array[2]);
+          claimIndex = parseInt(text_array[3]) - 1;
+          var docRef = db.collection("users").doc(phoneNumber);
+          docRef.get().then(function (doc) {
+            console.log(phoneNumber)
+            userData = doc.data();
+            web3Account = userData.account;
+            idContract = userData.idContractAddress;
+            console.log(web3Account)
+            web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
+            console.log(web3Account)
+            signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
+            web3.eth.accounts.wallet.add(signer)
+            presentClaim(db, sessionId, phoneNumber, web3, claimType, claimIndex, idContract, signer, res)
+          })
+
+
+
+
+
           break;
 
         case 6:
-          //check received string to determine which claim to get
-          //add phoneNumber hash and claimId to list of claimsToCheck on Verifier Account
+          /*Wants to make a claim, only allow names as of now, request info*/
           break;
+        case 7:
+          //same as case 4: User has selected to remove claim, retrieve a list of claims within chosen category
+          //text[0] = pin
+          //text[1] = initial choice(present, view etc...)
+          //text[2] = choice of claim type
+          //text[3] = claim index + 1
+          text_array = text.split('*');
+          var docRef = db.collection("users").doc(phoneNumber);
+          docRef.get().then(function (doc) {
+            console.log(phoneNumber)
+            userData = doc.data();
+            web3Account = userData.account;
+            idContract = userData.idContractAddress;
+            console.log(web3Account)
+            web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
+            console.log(web3Account)
+            signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
+            web3.eth.accounts.wallet.add(signer)
+            switch (text_array[2]) {
+              case "1":
+                //user wants claims on name
+                //selectClaimsToPresent(db, sessionId, web3, topic, idContract, signer, res) 
+                selectClaimsToRemove(db, sessionId, web3, 1, idContract, signer, res)
+                break;
+              case "2":
+                //user wants claims on age
+                selectClaimsToRemove(db, sessionId, web3, 2, idContract, signer, res)
+                break;
+              case "3":
+                //user wants claims on nationalId
+                selectClaimsToRemove(db, sessionId, web3, 3, idContract, signer, res)
+                break;
+              case "4":
+                //user wants claims on driversLicense
+                selectClaimsToRemove(db, sessionId, web3, 4, idContract, signer, res)
+                break;
+              case "5":
+                //user wants claims on Covid Vaccination
+                selectClaimsToRemove(db, sessionId, web3, 5, idContract, signer, res)
+
+                break;
+              case "6":
+                //user wants claims on Passport
+                selectClaimsToRemove(db, sessionId, web3, 6, idContract, signer, res)
+                break;
+              
+            }
+          });
+          break;
+          case 8:
+            //list claims within chosen topic and handle input
+            //text[0] = pin
+            //text[1] = initial choice(present, view etc...)
+            //text[2] = choice of claim type
+            //text[3] = claim index + 1
+            console.log("HERE!!!!!")
+            text_array = text.split('*');
+            console.log("NOW HERE!!!!!")
+            claimType = parseInt(text_array[2]);
+            claimIndex = parseInt(text_array[3]) - 1;
+            console.log("NOW NOW HERE!!!!!")
+            var docRef = db.collection("users").doc(phoneNumber);
+            docRef.get().then(function (doc) {
+              console.log(phoneNumber)
+              userData = doc.data();
+              web3Account = userData.account;
+              idContract = userData.idContractAddress;
+              console.log(web3Account)
+              web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
+              console.log(web3Account)
+              signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
+              web3.eth.accounts.wallet.add(signer)
+              removeClaim(db, sessionId, phoneNumber, web3, claimType, claimIndex, idContract, signer, res)
+            });
+          break;
+
       }
     } else {
       // doc.data() will be undefined in this case
@@ -251,7 +343,7 @@ function updateSession(db, sessionId, lastPage) {
     });
 }
 
-async function viewClaimsByTopic(web3, topic, idContract, signer) {
+async function viewClaimsByTopic(db, sessionId, web3, topic, idContract, signer, res) {
   identity.getClaimsByTopic(web3, topic, idContract, signer).then(async function (claims) {
     response = `END`
     if (claims.length == 0) {
@@ -280,7 +372,7 @@ async function viewClaimsByTopic(web3, topic, idContract, signer) {
   })
 }
 
-async function selectClaimsToPresent(db, web3, topic, idContract, signer) {
+async function selectClaimsToPresent(db, sessionId, web3, topic, idContract, signer, res) {
   identity.getClaimsByTopic(web3, topic, idContract, signer).then(async function (claims) {
     response = `CON Select The Claim You Wish To Present`
     if (claims.length == 0) {
@@ -289,6 +381,7 @@ async function selectClaimsToPresent(db, web3, topic, idContract, signer) {
       }).catch((error) => {
         console.error("Error removing document: ", error);
       });
+
       response = `END There are no claims of this type on your ID`
       res.set("Content-Type: text/plain");
       res.send(response)
@@ -298,6 +391,48 @@ async function selectClaimsToPresent(db, web3, topic, idContract, signer) {
       response = response + `${i + 1}: ${web3.utils.hexToAscii(claim.data)}\n`
       console.log(response)
     }
+    updateSession(db, sessionId, 5)
+    res.set("Content-Type: text/plain");
+    res.send(response);
+  })
+}
+
+async function selectClaimsToRemove(db, sessionId, web3, topic, idContract, signer, res) {
+  identity.getClaimsByTopic(web3, topic, idContract, signer).then(async function (claims) {
+    response = `CON Select The Claim You Wish To Remove`
+    if (claims.length == 0) {
+      db.collection("sessions").doc(sessionId).delete().then(() => {
+        console.log("Document successfully deleted!");
+      }).catch((error) => {
+        console.error("Error removing document: ", error);
+      });
+
+      response = `END There are no claims of this type on your ID`
+      res.set("Content-Type: text/plain");
+      res.send(response)
+    }
+    for (i = 0; i < claims.length; i++) {
+      claim = await identity.getClaim(web3, claims[i], idContract, signer);
+      response = response + `${i + 1}: ${web3.utils.hexToAscii(claim.data)}\n`
+      console.log(response)
+    }
+    updateSession(db, sessionId, 8)
+    res.set("Content-Type: text/plain");
+    res.send(response);
+  })
+}
+
+async function presentClaim(db, sessionId, phone, web3, topic, index, idContract, signer, res) {
+  var publicRef = db.collection("public").doc(phone)
+  claims = await identity.getClaimsByTopic(web3, topic, idContract, signer);
+  claimId = claims[index]
+  await publicRef.set({
+    presentedCliam: claimId
+  }).then(() => {
+    message = "Document successfully written!";
+    //console.log(message);
+    var response = `END Claim Ready to Verify`;
+    //delete session data
     db.collection("sessions").doc(sessionId).delete().then(() => {
       console.log("Document successfully deleted!");
     }).catch((error) => {
@@ -306,6 +441,27 @@ async function selectClaimsToPresent(db, web3, topic, idContract, signer) {
     res.set("Content-Type: text/plain");
     res.send(response);
   })
+    .catch((error) => {
+      message = "Error occured!";
+      console.error("Error writing document: ", error);
+      db.collection("sessions").doc(sessionId).delete().then(() => {
+        console.log("Document successfully deleted!");
+      }).catch((error) => {
+        console.error("Error removing document: ", error);
+      });
+    });
+
+
+}
+
+async function removeClaim(db, sessionId, phone, web3, topic, index, idContract, signer, res) {
+  /*
+  remove the chosen claim from the users account
+  */
+  claims = await identity.getClaimsByTopic(web3, topic, idContract, signer);
+  claimId = claims[index]
+  await identity.removeClaim(web3, claimId, idContract, signer);
+
 }
 
 

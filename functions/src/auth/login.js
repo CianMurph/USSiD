@@ -34,7 +34,7 @@ async function signIn(firebase, db, phone, password, res,  sessionId) {
                 message = "Error occured!";
                 console.error("Error writing document: ", error);
               });
-            response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Make Claim`
+            response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Present Claim\n3. Add Claim\n 4. Remove Claim`
             res.set("Content-Type: text/plain");
             res.send(response);
           })

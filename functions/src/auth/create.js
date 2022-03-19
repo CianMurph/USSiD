@@ -21,8 +21,10 @@ function createNewAccount(firebase, db, phone, text, password, web3, serviceCode
     //web3Account = web3.eth.accounts.encrypt(web3Account.privateKey, text[1]);
     signer = web3.eth.accounts.privateKeyToAccount(acc.privateKey)
     web3.eth.accounts.wallet.add(signer);
+    console.log(`Outside Function ${signer.address}`)
+    
     web3Account = web3.eth.accounts.encrypt(signer.privateKey, text[1]);
-    idContract = identity.deploy(web3, signer.address, false, web3Account);
+    idContract = identity.deploy(web3, signer.address, false, signer);
 
     //Create instance in public collection also
     idContract.then(function(contractAddress){

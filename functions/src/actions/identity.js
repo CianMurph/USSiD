@@ -28,7 +28,9 @@ async function deploy(web3, _initialKey, _isLibrary, signer) {
 
   const contract = new web3.eth.Contract(identity.abi);
   contract.options.data = identity.data;
+  console.log(`inside function ${_initialKey}`);
   const deployTx = contract.deploy({ arguments: [_initialKey, _isLibrary] });
+  console.log(deployTx)
   const deployedContract = await deployTx
     .send({
       from: signer.address,
