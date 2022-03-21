@@ -1,8 +1,8 @@
 const crypto = require('./../crypto');
 
-async function signIn(firebase, db, phone, password, res,  sessionId) {
+async function signIn(firebase, db,  collection, phone, password, res,  sessionId) {
 
-  var docRef = db.collection("users").doc(phone);
+  var docRef = db.collection(collection).doc(phone);
   var uid = phone;
   var claim = {
     control: true
@@ -12,8 +12,6 @@ async function signIn(firebase, db, phone, password, res,  sessionId) {
       //console.log("Document data:", doc.data());
       user_data = doc.data();
 
-
-      console.log('service code for user')
       if (crypto.decrypt(password) === crypto.decrypt(user_data.password)) {
         console.log('Passwords Match')
         firebase.auth().createCustomToken(uid)
@@ -34,7 +32,12 @@ async function signIn(firebase, db, phone, password, res,  sessionId) {
                 message = "Error occured!";
                 console.error("Error writing document: ", error);
               });
-            response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Present Claim\n3. Add Claim\n 4. Remove Claim`
+            if(collection === 'users'){
+              response = `CON Signed In: What would you like to do?\n1. View Claims\n2. Present Claim\n3. Add Claim\n 4. Remove Claim\n 5. Stop Presentation`
+            }
+            else{
+              response = `CON Signed In: Please Enter the Claim Holder's Phone Number`
+            }
             res.set("Content-Type: text/plain");
             res.send(response);
           })

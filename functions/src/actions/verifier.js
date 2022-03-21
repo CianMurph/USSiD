@@ -143,7 +143,7 @@ async function addClaim(
 
 }
 
-async function removeClaim(web3,_claimId, signer) {
+async function removeClaim(web3,_claimId, signer,contractAddress) {
     deployedIdContract = new web3.eth.Contract(claimIssuer.abi, contractAddress);
     const tx = deployedIdContract.methods.removeClaim(_claimId)
     const receipt = await tx
@@ -160,12 +160,12 @@ async function removeClaim(web3,_claimId, signer) {
 }
 
 
-async function getClaim(web3,_claimId, account) {
+async function getClaim(web3,_claimId, account ,contractAddress) {
     deployedIdContract = new web3.eth.Contract(claimIssuer.abi, contractAddress);
     return await deployedIdContract.methods.getClaim(_claimId).call({from:account});
 }
 
-async function revokeClaim(web3,_claimId, _identity, signer) {
+async function revokeClaim(web3, _claimId, _identity, signer ,contractAddress) {
     deployedIdContract = new web3.eth.Contract(claimIssuer.abi, contractAddress);
     const tx = deployedIdContract.methods.revokeClaim(_claimId, _identity)
     const receipt = await tx
@@ -181,8 +181,8 @@ async function revokeClaim(web3,_claimId, _identity, signer) {
     console.log(`Mined in block ${receipt.blockNumber}`);
 }
 
-async function checkValidity(web3,_identity, claimTopic, sig, data, account){
-    deployedIdContract = new web3.eth.Contract(claimIssuer.abi, _identity);
+async function checkValidity(web3, claimTopic, sig, data, _identity, account, issuerContractAddress){
+    deployedIdContract = new web3.eth.Contract(claimIssuer.abi, issuerContractAddress);
     return await deployedIdContract.methods.isClaimValid(_identity, claimTopic, sig, data).call({from:account});
 }
 
@@ -198,5 +198,5 @@ async function checkRevocation(web3,sig, account){
 module.exports = {
     deploy, getClaim, removeClaim, addClaim, keyHasPurpose, removeKey, execute, 
     approve, addKey, getKeysByPurpose, getKeyPurposes, removeKey, getKey, revokeClaim, 
-    checkValidity, checkRevocation
+    checkValidity, checkRevocation, ClaimTypes
 }

@@ -147,7 +147,7 @@ async function addClaim(
     });
   // The transaction is now on chain!
   console.log(`Mined in block ${receipt.blockNumber}`);
-  return deployedIdContract.options.address;
+  return receipt;
 
 }
 
@@ -166,6 +166,7 @@ async function removeClaim(web3,_claimId,contractAddress, signer) {
     });
   // The transaction is now on chain!
   console.log(`Mined in block ${receipt.blockNumber}`);
+  return receipt;
 }
 
 
