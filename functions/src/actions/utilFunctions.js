@@ -81,19 +81,22 @@ async function viewClaimsByTopic(db, sessionIdStr, web3, topic, idContract, sign
             res.set("Content-Type: text/plain");
             res.send(response);
         }
-        for (i = 0; i < claims.length; i++) {
-            claim = await identity.getClaim(web3, claims[i], idContract, signer);
-            response = response + `${i + 1}: ${web3.eth.abi.decodeParameter('string', claim.data)}\n`
-            console.log(response)
+        else {
+            for (i = 0; i < claims.length; i++) {
+                claim = await identity.getClaim(web3, claims[i], idContract, signer);
+                response = response + `${i + 1}: ${web3.eth.abi.decodeParameter('string', claim.data)}\n`
+                console.log(response)
 
+            }
+            db.collection("sessions").doc(sessionIdStr).delete().then(() => {
+                console.log("Document successfully deleted!");
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
+            console.log('Sending Response');
+            res.set("Content-Type: text/plain");
+            res.send(response);
         }
-        db.collection("sessions").doc(sessionIdStr).delete().then(() => {
-            console.log("Document successfully deleted!");
-        }).catch((error) => {
-            console.error("Error removing document: ", error);
-        });
-        res.set("Content-Type: text/plain");
-        res.send(response);
     })
 }
 
@@ -148,7 +151,7 @@ async function presentClaim(db, sessionIdStr, phone, web3, topic, index, idContr
         id: claimId,
         topic: claim.topic,
         issuerAddress: claim.issuer,
-        signature:claim.signature,
+        signature: claim.signature,
         data: claim.data
     }, { merge: true }).then(() => {
         message = "Document successfully written!";
@@ -182,10 +185,10 @@ async function removeClaim(db, sessionIdStr, phone, web3, topic, index, idContra
 
 }
 
-function deleteSession(db, sessionIdStr){
+function deleteSession(db, sessionIdStr) {
     db.collection("sessions").doc(sessionIdStr).delete().then(() => {
-      console.log("Document successfully deleted!");
+        console.log("Document successfully deleted!");
     }).catch((error) => {
-      console.error("Error removing document: ", error);
+        console.error("Error removing document: ", error);
     });
-  }
+}

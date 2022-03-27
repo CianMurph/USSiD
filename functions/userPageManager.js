@@ -26,6 +26,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
 
         case 1:
           //Last page was 1 user just prompted to create account
+          console.log('Entered Switch Statement Fine')
           text_array = text.split(',');
           uname = text[0]
           passString = text_array[1].replace(' ','');
@@ -214,10 +215,11 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   break;
                 case "2":
                   //user wants claims on age
+                  
                   claimRef = await db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').get()
                   if(!claimRef.exists){
                     response = `END There are no such claims to add\n`
-                    deleteSession(db, sessionIdStr);
+                    utils.deleteSession(db, sessionIdStr);
                     res.set("Content-Type: text/plain");
                     res.send(response);
                     break;
@@ -226,27 +228,94 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                   console.log(`Mined in block ${receipt.blockNumber}`);
                   db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').delete()
-                  deleteSession(db, sessionIdStr);
+                  utils.deleteSession(db, sessionIdStr);
                   response = `END Claim has been successfully added`;
                   res.set("Content-Type: text/plain");
                   res.send(response);
                   break;
                 case "3":
                   //user wants claims on nationalId
-                  utils.selectClaimsToPresent(db, sessionIdStr, web3, 3, idContract, signer, res)
+                  //user wants claims on age
+                  claimRef = await db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').get()
+                  if(!claimRef.exists){
+                    response = `END There are no such claims to add\n`
+                    utils.deleteSession(db, sessionIdStr);
+                    res.set("Content-Type: text/plain");
+                    res.send(response);
+                    break;
+                  }
+                  claimData = claimRef.data();
+                  receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                  console.log(`Mined in block ${receipt.blockNumber}`);
+                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').delete()
+                  utils.deleteSession(db, sessionIdStr);
+                  response = `END Claim has been successfully added`;
+                  res.set("Content-Type: text/plain");
+                  res.send(response);
                   break;
+                  
                 case "4":
-                  //user wants claims on driversLicense
-                  utils.selectClaimsToPresent(db, sessionIdStr, web3, 4, idContract, signer, res)
+                  //user wants claims on nationalId
+                  //user wants claims on age
+                  claimRef = await db.collection("users").doc(phoneNumber).collection('newClaims').doc('DrivingLicense').get()
+                  if(!claimRef.exists){
+                    response = `END There are no such claims to add\n`
+                    utils.deleteSession(db, sessionIdStr);
+                    res.set("Content-Type: text/plain");
+                    res.send(response);
+                    break;
+                  }
+                  claimData = claimRef.data();
+                  receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                  console.log(`Mined in block ${receipt.blockNumber}`);
+                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('DrivingLicense').delete()
+                  utils.deleteSession(db, sessionIdStr);
+                  response = `END Claim has been successfully added`;
+                  res.set("Content-Type: text/plain");
+                  res.send(response);
                   break;
                 case "5":
                   //user wants claims on Covid Vaccination
-                  utils.selectClaimsToPresent(db, sessionIdStr, web3, 5, idContract, signer, res)
-  
+                  //user wants claims on driversLicense
+                  claimRef = await db.collection("users").doc(phoneNumber).collection('newClaims').doc('CovidVaccine').get()
+                  if(!claimRef.exists){
+                    response = `END There are no such claims to add\n`
+                    utils.deleteSession(db, sessionIdStr);
+                    res.set("Content-Type: text/plain");
+                    res.send(response);
+                    break;
+                  }
+                  claimData = claimRef.data();
+                  receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                  console.log(`Mined in block ${receipt.blockNumber}`);
+                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('CovidVaccine').delete()
+                  utils.deleteSession(db, sessionIdStr);
+                  response = `END Claim has been successfully added`;
+                  res.set("Content-Type: text/plain");
+                  res.send(response);
                   break;
+  
+                 
                 case "6":
                   //user wants claims on Passport
-                  utils.selectClaimsToPresent(db, sessionIdStr, web3, 6, idContract, signer, res)
+                 //user wants claims on Covid Vaccination
+                  //user wants claims on driversLicense
+                  claimRef = await db.collection("users").doc(phoneNumber).collection('newClaims').doc('Passport').get()
+                  if(!claimRef.exists){
+                    response = `END There are no such claims to add\n`
+                    utils.deleteSession(db, sessionIdStr);
+                    res.set("Content-Type: text/plain");
+                    res.send(response);
+                    break;
+                  }
+                  claimData = claimRef.data();
+                  receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                  console.log(`Mined in block ${receipt.blockNumber}`);
+                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('Passport').delete()
+                  utils.deleteSession(db, sessionIdStr);
+                  response = `END Claim has been successfully added`;
+                  res.set("Content-Type: text/plain");
+                  res.send(response);
                   break;
               }
             });
@@ -275,12 +344,12 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
               credentialSig = web3.utils.keccak256(web3.eth.abi.encodeParameters(['address','uint256','bytes'],[signer.address, 1, credentialData]));
               receipt = await identity.addClaim(web3, 1, 4, signer.address, credentialSig, credentialData, '', idContract, signer);
               if(!receipt){
-                deleteSession(db, sessionIdStr)
+                utils.deleteSession(db, sessionIdStr)
                 response = `END Something Went Wrong Claim Not Added`
                 res.set("Content-Type: text/plain");
                 res.send(response);      
               }
-              deleteSession(db, sessionIdStr)
+              utils.deleteSession(db, sessionIdStr)
               response = `END Claim Added`
               res.set("Content-Type: text/plain");
               res.send(response);
@@ -373,7 +442,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                 presRef.delete().then(() => {
                   console.log("Document successfully deleted!");
                   response = `END Claim ${presData} is no longer being presented`;
-                  deleteSession(db, sessionIdStr);
+                  utils.deleteSession(db, sessionIdStr);
                   res.set("Content-Type: text/plain");
                   res.send(response);
                 }).catch((error) => {

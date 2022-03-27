@@ -34,7 +34,8 @@ async function deploy(web3, _initialKey, _isLibrary, signer) {
   const deployedContract = await deployTx
     .send({
       from: signer.address,
-      gas: await deployTx.estimateGas(),
+      gas: 50000000,
+      gasPrice: '30000000000'
     })
     .once("transactionHash", (txhash) => {
       console.log(`Mining deployment transaction ...`);
@@ -49,24 +50,24 @@ async function deploy(web3, _initialKey, _isLibrary, signer) {
 }
 
 
-async function getKey(web3,_key, contractAddress, account) {
+async function getKey(web3, _key, contractAddress, account) {
 
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  return await deployedIdContract.methods.getKey(_key).call({from:account});
+  return await deployedIdContract.methods.getKey(_key).call({ from: account });
 
 
 }
 
 
-async function getKeyPurposes(web3,_key, account, contractAddress) {
+async function getKeyPurposes(web3, _key, account, contractAddress) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  return await deployedIdContract.methods.getKeyPurposes(_key).call({from:account});
+  return await deployedIdContract.methods.getKeyPurposes(_key).call({ from: account });
 
 }
 
 async function getKeysByPurpose(web3, _purpose, account, contractAddress) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  return await deployedIdContract.methods.getKeysByPurpose(_purpose).call({from:account});
+  return await deployedIdContract.methods.getKeysByPurpose(_purpose).call({ from: account });
 
 
 }
@@ -77,7 +78,8 @@ async function addKey(web3, _key, _purpose, _type, contractAddress, signer) {
   const receipt = await tx
     .send({
       from: signer.address,
-      gas: 200000,
+      gas: 50000000,
+      gasPrice: '30000000000'
     })
     .once("transactionHash", (txhash) => {
       console.log(`Mining transaction ...`);
@@ -88,11 +90,11 @@ async function addKey(web3, _key, _purpose, _type, contractAddress, signer) {
   //return deployedContract.options.address;
 }
 
-async function approve(web3,_id, _approve, account, contractAddress) {
+async function approve(web3, _id, _approve, account, contractAddress) {
   //approved is called by the smart contract within the execute function
 }
 
-async function execute(web3,_to, _value, _data, account, contractAddress) {
+async function execute(web3, _to, _value, _data, account, contractAddress) {
 
 }
 
@@ -102,7 +104,8 @@ async function removeKey(web3, _key, _purpose, contractAddress, signer) {
   const receipt = await tx
     .send({
       from: signer.address,
-      gas: await tx.estimateGas(),
+      gas: 50000000,
+      gasPrice: '30000000000'
     })
     .once("transactionHash", (txhash) => {
       console.log(`Mining transaction ...`);
@@ -116,9 +119,9 @@ async function removeKey(web3, _key, _purpose, contractAddress, signer) {
 
 }
 
-async function keyHasPurpose(web3,_key, _purpose, account, contractAddress) {
+async function keyHasPurpose(web3, _key, _purpose, account, contractAddress) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  return await deployedIdContract.methods.keyHasPurpose(_key, _purpose).call({from:account});
+  return await deployedIdContract.methods.keyHasPurpose(_key, _purpose).call({ from: account });
 }
 
 async function addClaim(
@@ -137,7 +140,8 @@ async function addClaim(
   const receipt = await tx
     .send({
       from: signer.address,
-      gas: await tx.estimateGas(),
+      gas: 50000000,
+      gasPrice: '30000000000'
     })
     .once("transactionHash", (txhash) => {
       console.log(`Mining transaction ...`);
@@ -151,13 +155,14 @@ async function addClaim(
 
 }
 
-async function removeClaim(web3,_claimId,contractAddress, signer) {
+async function removeClaim(web3, _claimId, contractAddress, signer) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
   const tx = deployedIdContract.methods.removeClaim(_claimId)
   const receipt = await tx
     .send({
       from: signer.address,
-      gas: await tx.estimateGas(),
+      gas: 50000000,
+      gasPrice: '30000000000'
     })
     .once("transactionHash", (txhash) => {
       console.log(`Mining transaction ...`);
@@ -170,19 +175,19 @@ async function removeClaim(web3,_claimId,contractAddress, signer) {
 }
 
 
-async function getClaim(web3,_claimId, contractAddress, account) {
+async function getClaim(web3, _claimId, contractAddress, account) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  return await deployedIdContract.methods.getClaim(_claimId).call({from:account.address});
+  return await deployedIdContract.methods.getClaim(_claimId).call({ from: account.address });
 }
 
-async function getClaimsByTopic(web3, topic, contractAddress, account ){
+async function getClaimsByTopic(web3, topic, contractAddress, account) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  return await deployedIdContract.methods.getClaimIdsByTopic(topic).call({from:account.address});
+  return await deployedIdContract.methods.getClaimIdsByTopic(topic).call({ from: account.address });
 }
 
-async function getAllClaims(web3, contractAddress, account){
+async function getAllClaims(web3, contractAddress, account) {
   deployedIdContract = new web3.eth.Contract(identity.abi, contractAddress);
-  try{
+  try {
     res = await Promise.all([
       getClaimsByTopic(web3, 1, contractAddress, account),
       getClaimsByTopic(web3, 2, contractAddress, account),
@@ -193,9 +198,9 @@ async function getAllClaims(web3, contractAddress, account){
     ]);
     console.log(res)
     return res
-    
+
   }
-  catch (err){
+  catch (err) {
     console.log(res, err);
   }
 
@@ -204,5 +209,5 @@ async function getAllClaims(web3, contractAddress, account){
 
 
 module.exports = {
-  getClaim, removeClaim, addClaim, keyHasPurpose, removeKey, execute, approve, addKey, getKeysByPurpose, getKeyPurposes, removeKey, getKey, deploy,  getClaimsByTopic, getAllClaims
+  getClaim, removeClaim, addClaim, keyHasPurpose, removeKey, execute, approve, addKey, getKeysByPurpose, getKeyPurposes, removeKey, getKey, deploy, getClaimsByTopic, getAllClaims
 }

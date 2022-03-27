@@ -112,11 +112,7 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
                     if(vailidity === true){
                         decodedData = web3.eth.abi.decodeParameter('string', userClaim.data)
                         decodedDataJson = JSON.parse(decodedData);
-                        expiry = new Date(decodedDataJson.End)
-                        if(expiry < new Date()){
-                            response = `END The document expired on decodedDataJson.End`;
-                        }
-                        else{response = `END Document is valid`;}
+                        response = `END Document is valid`;
                         res.set("Content-Type: text/plain");
                         res.send(response);
                     }

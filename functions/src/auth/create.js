@@ -7,18 +7,28 @@ const identity = require("../actions/identity")
 
 async function createNewAccount(firebase, db, collection, phone, text, password, web3, serviceCode, sessionId, res) {
     const userWall = web3.eth.accounts.wallet.create();
-    luxAccounts = await fs.readFile(accountsPath, 'utf8', (err, data) => {
+    console.log('started creating account ok')
+
+    const accountsRef = db.collection('accounts');
+    const snapshot = await accountsRef.get();
+    snapshot.forEach(doc => {
+        console.log(doc.id, '=>', doc.data());
+      });
+
+    luxAccounts = fs.readFile(accountsPath, 'utf8', (err, data) => {
         if (err) {
             console.log(`Error reading file from disk: ${err}`);
         } else {
             luxAccounts = JSON.parse(data)
-            console.log(luxAccounts[0])
+            if(luxAccounts){console.log('retrieved list of accounts successfully')}
 
             for (let i = 0; i <= luxAccounts.length; i++) {
                 if (luxAccounts[i].taken == false) {
+                    console.log('found unused account ' + i.toString())
                     acc = luxAccounts[i]
                     luxAccounts[i].taken = true;
-                    fs.writeFileSync(accountsPath, JSON.stringify(accounts));
+                    console.log('about to write')
+                    //fs.writeFileSync(accountsPath, JSON.stringify(accounts));
                     break
                 }
             }
