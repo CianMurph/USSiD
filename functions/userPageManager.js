@@ -227,7 +227,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   claimData = claimRef.data();
                   receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                   console.log(`Mined in block ${receipt.blockNumber}`);
-                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').delete()
+                  //db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').delete()
                   utils.deleteSession(db, sessionIdStr);
                   response = `END Claim has been successfully added`;
                   res.set("Content-Type: text/plain");
@@ -235,7 +235,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   break;
                 case "3":
                   //user wants claims on nationalId
-                  //user wants claims on age
+                  
                   claimRef = await db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').get()
                   if(!claimRef.exists){
                     response = `END There are no such claims to add\n`
@@ -247,7 +247,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   claimData = claimRef.data();
                   receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                   console.log(`Mined in block ${receipt.blockNumber}`);
-                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').delete()
+                  //db.collection("users").doc(phoneNumber).collection('newClaims').doc('NationalID').delete()
                   utils.deleteSession(db, sessionIdStr);
                   response = `END Claim has been successfully added`;
                   res.set("Content-Type: text/plain");
@@ -268,7 +268,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   claimData = claimRef.data();
                   receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                   console.log(`Mined in block ${receipt.blockNumber}`);
-                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('DrivingLicense').delete()
+                  //db.collection("users").doc(phoneNumber).collection('newClaims').doc('DrivingLicense').delete()
                   utils.deleteSession(db, sessionIdStr);
                   response = `END Claim has been successfully added`;
                   res.set("Content-Type: text/plain");
@@ -288,7 +288,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   claimData = claimRef.data();
                   receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                   console.log(`Mined in block ${receipt.blockNumber}`);
-                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('CovidVaccine').delete()
+                  //db.collection("users").doc(phoneNumber).collection('newClaims').doc('CovidVaccine').delete()
                   utils.deleteSession(db, sessionIdStr);
                   response = `END Claim has been successfully added`;
                   res.set("Content-Type: text/plain");
@@ -311,7 +311,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   claimData = claimRef.data();
                   receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                   console.log(`Mined in block ${receipt.blockNumber}`);
-                  db.collection("users").doc(phoneNumber).collection('newClaims').doc('Passport').delete()
+                  //db.collection("users").doc(phoneNumber).collection('newClaims').doc('Passport').delete()
                   utils.deleteSession(db, sessionIdStr);
                   response = `END Claim has been successfully added`;
                   res.set("Content-Type: text/plain");
