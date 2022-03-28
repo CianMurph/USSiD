@@ -84,8 +84,19 @@ async function viewClaimsByTopic(db, sessionIdStr, web3, topic, idContract, sign
         else {
             for (i = 0; i < claims.length; i++) {
                 claim = await identity.getClaim(web3, claims[i], idContract, signer);
-                response = response + `${i + 1}: ${web3.eth.abi.decodeParameter('string', claim.data)}\n`
-                console.log(response)
+                claimData = web3.eth.abi.decodeParameter('string', claim.data)
+                if(topic == 1){
+                    claimData = claimData.replace('{','');
+                    claimData = claimData.replace('}','');
+                    response = response + `${i + 1}: ${claimData}\n`
+                    console.log(response)
+                }
+                else{
+                    claimDataJson = JSON.parse(claimData)
+                    response = response + `${i + 1}: ${claimDataJson.DocID}\n`
+                    console.log(response)
+                }
+                
 
             }
             db.collection("sessions").doc(sessionIdStr).delete().then(() => {
