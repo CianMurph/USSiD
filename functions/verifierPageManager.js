@@ -4,7 +4,6 @@ const auth_fns = require('./src/auth');
 const crypto = require('./src/crypto');
 const Web3 = require('web3');
 const claimissuer = require('./src/contracts/abi/claimissuer');
-const { response } = require('express');
 const web3 = new Web3('https://rpc.l14.lukso.network/');
 
 async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, res) {
@@ -67,7 +66,8 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
                     userPhoneHash = crypto.hash(text_array[1]);
                     console.log('unhashed user number ' + text_array[1])
                     console.log('Hash of user number ' + userPhoneHash);
-                    index = parseInt(text[2]) - 1
+                    index = parseInt(text_array[2]) - 1
+                    console.log(`Index = ${index}`)
                     try {
                         claimType = identity.ClaimTypes[index].value;
                     }
@@ -78,6 +78,7 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
                         res.set("Content-Type: text/plain");
                         res.send(response);
                     }
+                    console.log(claimType)
                     issuerContract = await db.collection('issuers').doc(claimType).get();
                     console.log(issuerContract);
                     issuerContractAddress = issuerContract.data().contractAddress;
@@ -105,12 +106,12 @@ async function checkSession(fs, db, sessionId, serviceCode, phoneNumber, text, r
                     }
                     else {
                         userContract = userContractRef.data();
-                        userContractAddress = userContract.contractAddress;
+                        userContractAddress = userContract.idContractAddress;
                     }
                     console.log({topic:userClaim.topic, sig:userClaim.signature, data:userClaim.data, identity:userContractAddress, sender:signer.address, issuer:issuerContractAddress})
                     vailidity = await identity.checkValidity(web3, userClaim.topic, userClaim.signature, userClaim.data, userContractAddress, signer.address, issuerContractAddress);
                     if(vailidity === true){
-                        decodedData = web3.eth.abi.decodeParameter('string', userClaim.data)
+                        decodedData = web3.utils.hexToAscii(userClaim.data)
                         decodedDataJson = JSON.parse(decodedData);
                         response = `END Document is valid`;
                         res.set("Content-Type: text/plain");

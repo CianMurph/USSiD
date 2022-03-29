@@ -17,8 +17,8 @@ const Schemes = [
 
 const ClaimTypes = [
     { id: '1', value: 'Full Name' },
-    { id: '2', value: 'Age' },
-    { id: '3', value: 'National ID' },
+    { id: '2', value: 'National ID' },
+    { id: '3', value: 'Age' },
     { id: '4', value: 'Driver Licence' },
     { id: '5', value: 'Covid Vaccine' },
     { id: '6', value: 'Passport' }
@@ -43,6 +43,7 @@ async function deploy(web3, _initialKey, signer) {
     console.log(
         `Add DEMO_CONTRACT to the.env file to store the contract address: ${deployedContract.options.address}`
     );
+    return deployedContract.options.address;
 }
 
 
@@ -188,7 +189,10 @@ async function revokeClaim(web3, _claimId, _identity, signer, contractAddress) {
 }
 
 async function checkValidity(web3, claimTopic, sig, data, _identity, account, issuerContractAddress) {
+    console.log('checking validity')
     deployedIdContract = new web3.eth.Contract(claimIssuer.abi, issuerContractAddress);
+    console.log(`have contract params`)
+    console.log({topic:claimTopic, sig:sig, data:data, identity:_identity, sender:account, issuer:issuerContractAddress});
     return await deployedIdContract.methods.isClaimValid(_identity, claimTopic, sig, data).call({ from: account });
 }
 

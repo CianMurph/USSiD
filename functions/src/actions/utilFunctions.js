@@ -74,7 +74,8 @@ function updateSession(db, sessionIdStr, lastPage) {
 
 async function viewClaimsByTopic(db, sessionIdStr, web3, topic, idContract, signer, res) {
     identity.getClaimsByTopic(web3, topic, idContract, signer).then(async function (claims) {
-        response = `END`
+        response = `END `
+        
         if (claims.length == 0) {
             deleteSession(db, sessionIdStr);
             response = `END There are no claims of this type on your ID`
@@ -82,18 +83,24 @@ async function viewClaimsByTopic(db, sessionIdStr, web3, topic, idContract, sign
             res.send(response);
         }
         else {
+            console.log(`Viewing Claims on topic ${topic}\n`)
+            console.log(`There are ${claims.length} claims`)
             for (i = 0; i < claims.length; i++) {
+                console.log('entering for loop')
                 claim = await identity.getClaim(web3, claims[i], idContract, signer);
-                claimData = web3.eth.abi.decodeParameter('string', claim.data)
+                claimData = web3.utils.hexToAscii(claim.data)
                 if(topic == 1){
+                    console.log('Claim is on name')
                     claimData = claimData.replace('{','');
                     claimData = claimData.replace('}','');
                     response = response + `${i + 1}: ${claimData}\n`
                     console.log(response)
                 }
                 else{
+                    console.log('Claim is not on name print docuent number')
                     claimDataJson = JSON.parse(claimData)
-                    response = response + `${i + 1}: ${claimDataJson.DocID}\n`
+                    console.log(claimDataJson)
+                    response = response + `${i + 1}: Document ID: ${claimDataJson.DocID}\n`
                     console.log(response)
                 }
                 
@@ -104,7 +111,8 @@ async function viewClaimsByTopic(db, sessionIdStr, web3, topic, idContract, sign
             }).catch((error) => {
                 console.error("Error removing document: ", error);
             });
-            console.log('Sending Response');
+            console.log(`Sending Response ${response}`);
+            console.log(typeof(response))
             res.set("Content-Type: text/plain");
             res.send(response);
         }
@@ -122,9 +130,25 @@ async function selectClaimsToPresent(db, sessionIdStr, web3, topic, idContract, 
             res.send(response)
         }
         for (i = 0; i < claims.length; i++) {
+            console.log('entering for loop')
             claim = await identity.getClaim(web3, claims[i], idContract, signer);
-            response = response + `${i + 1}: ${web3.eth.abi.decodeParameter('string', claim.data)}\n`
-            console.log(response)
+            claimData = web3.utils.hexToAscii(claim.data)
+            if(topic == 1){
+                console.log('Claim is on name')
+                claimData = claimData.replace('{','');
+                claimData = claimData.replace('}','');
+                response = response + `${i + 1}: ${claimData}\n`
+                console.log(response)
+            }
+            else{
+                console.log('Claim is not on name print docuent number')
+                claimDataJson = JSON.parse(claimData)
+                console.log(claimDataJson)
+                response = response + `${i + 1}: Document ID: ${claimDataJson.DocID}\n`
+                console.log(response)
+            }
+            
+
         }
         updateSession(db, sessionIdStr, 5)
         res.set("Content-Type: text/plain");
@@ -143,11 +167,27 @@ async function selectClaimsToRemove(db, sessionIdStr, web3, topic, idContract, s
             res.send(response)
         }
         for (i = 0; i < claims.length; i++) {
+            console.log('entering for loop')
             claim = await identity.getClaim(web3, claims[i], idContract, signer);
-            response = response + `${i + 1}: ${web3.eth.abi.decodeParameter('string', claim.data)}\n`
-            console.log(response)
+            claimData = web3.utils.hexToAscii(claim.data)
+            if(topic == 1){
+                console.log('Claim is on name')
+                claimData = claimData.replace('{','');
+                claimData = claimData.replace('}','');
+                response = response + `${i + 1}: ${claimData}\n`
+                console.log(response)
+            }
+            else{
+                console.log('Claim is not on name print docuent number')
+                claimDataJson = JSON.parse(claimData)
+                console.log(claimDataJson)
+                response = response + `${i + 1}: Document ID: ${claimDataJson.DocID}\n`
+                console.log(response)
+            }
+            
+
         }
-        updateSession(db, sessionIdStr, 8)
+        updateSession(db, sessionIdStr, 9)
         res.set("Content-Type: text/plain");
         res.send(response);
     })
@@ -193,6 +233,9 @@ async function removeClaim(db, sessionIdStr, phone, web3, topic, index, idContra
     }).catch((error) => {
         console.error("Error removing document: ", error);
     });
+    var response = `END Claim Removed`;
+    res.set("Content-Type: text/plain");
+    res.send(response);
 
 }
 

@@ -4,6 +4,7 @@ const path = require('path');
 const accountsPath = path.resolve(__dirname, '..', 'contracts', 'storage', 'luxAccounts.json')
 const accounts = require('../contracts/storage/luxAccounts.json')
 const identity = require("../actions/identity")
+const claimIssuer = require('../actions/verifier')
 
 async function createNewAccount(firebase, db, collection, phone, text, password, web3, serviceCode, sessionId, res) {
     const userWall = web3.eth.accounts.wallet.create();
@@ -13,14 +14,14 @@ async function createNewAccount(firebase, db, collection, phone, text, password,
     const snapshot = await accountsRef.get();
     snapshot.forEach(doc => {
         console.log(doc.id, '=>', doc.data());
-      });
+    });
 
-    luxAccounts = fs.readFile(accountsPath, 'utf8', (err, data) => {
+    luxAccounts = fs.readFile(accountsPath, 'utf8', async function (err, data) {
         if (err) {
             console.log(`Error reading file from disk: ${err}`);
         } else {
             luxAccounts = JSON.parse(data)
-            if(luxAccounts){console.log('retrieved list of accounts successfully')}
+            if (luxAccounts) { console.log('retrieved list of accounts successfully') }
 
             for (let i = 0; i <= luxAccounts.length; i++) {
                 if (luxAccounts[i].taken == false) {
@@ -39,51 +40,53 @@ async function createNewAccount(firebase, db, collection, phone, text, password,
             console.log(`Outside Function ${signer.address}`)
 
             web3Account = web3.eth.accounts.encrypt(signer.privateKey, text[1]);
-            idContract = identity.deploy(web3, signer.address, false, signer);
+            if (collection === 'users') {
+                idContract = await identity.deploy(web3, signer.address, false, signer);
+            }
+            else if (collection === 'verifiers') {
+                idContract = await claimIssuer.deploy(web3, signer.address, signer)
+                newKey = claimIssuer.addKey(web3, signer.address, 3, 1, idContract, signer)
+            }
+
 
             //Create instance in public collection also
-            idContract.then(function (contractAddress) {
-                db.collection('public').doc(phone).set({
-                    idContractAddress: contractAddress
-                }).then(() => {
-                    message = "Document successfully written!";
-                })
-                    .catch((error) => {
-                        message = "Error occured!";
-                        console.error("Error writing document: ", error);
 
-                    });
-                db.collection(collection).doc(phone).set({
-                    name: text[0],
-                    password: password,
-                    account: web3Account,
-                    idContractAddress: contractAddress
-
-                })
-                    .then(() => {
-                        message = "Document successfully written!";
-                        //console.log(message);
-                        var response = `END Account Created Successfully, goodbye for now`;
-                        //delete session data
-                        db.collection("sessions").doc(sessionId).delete().then(() => {
-                            console.log("Document successfully deleted!");
-                        }).catch((error) => {
-                            console.error("Error removing document: ", error);
-                        });
-                        res.set("Content-Type: text/plain");
-                        res.send(response);
-                    })
-                    .catch((error) => {
-                        message = "Error occured!";
-                        console.error("Error writing document: ", error);
-
-                    });
+            db.collection('public').doc(phone).set({
+                idContractAddress: idContract
+            }).then(() => {
+                message = "Document successfully written!";
             })
                 .catch((error) => {
                     message = "Error occured!";
                     console.error("Error writing document: ", error);
 
                 });
+            db.collection(collection).doc(phone).set({
+                name: text[0],
+                password: password,
+                account: web3Account,
+                idContractAddress: idContract
+
+            })
+                .then(() => {
+                    message = "Document successfully written!";
+                    //console.log(message);
+                    var response = `END Account Created Successfully, goodbye for now`;
+                    //delete session data
+                    db.collection("sessions").doc(sessionId).delete().then(() => {
+                        console.log("Document successfully deleted!");
+                    }).catch((error) => {
+                        console.error("Error removing document: ", error);
+                    });
+                    res.set("Content-Type: text/plain");
+                    res.send(response);
+                })
+                .catch((error) => {
+                    message = "Error occured!";
+                    console.error("Error writing document: ", error);
+
+                });
+
         }
     });
 

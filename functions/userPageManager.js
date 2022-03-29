@@ -77,13 +77,13 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
           text_array = text.split('*');
           var docRef = db.collection("users").doc(phoneNumber);
           docRef.get().then(async function (doc) {
-            console.log(phoneNumber)
+            //console.log(phoneNumber)
             userData = doc.data();
             web3Account = userData.account;
             idContract = userData.idContractAddress;
-            console.log(web3Account)
+            //console.log(web3Account)
             web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
-            console.log(web3Account)
+            //console.log(web3Account)
             signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
             web3.eth.accounts.wallet.add(signer)
             switch (text_array[2]) {
@@ -122,13 +122,13 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
           text_array = text.split('*');
           var docRef = db.collection("users").doc(phoneNumber);
           docRef.get().then(function (doc) {
-            console.log(phoneNumber)
+            //console.log(phoneNumber)
             userData = doc.data();
             web3Account = userData.account;
             idContract = userData.idContractAddress;
-            console.log(web3Account)
+            //console.log(web3Account)
             web3Account = web3.eth.accounts.decrypt(web3Account, text_array[0])
-            console.log(web3Account)
+            //console.log(web3Account)
             signer = web3.eth.accounts.privateKeyToAccount(web3Account.privateKey)
             web3.eth.accounts.wallet.add(signer)
             switch (text_array[2]) {
@@ -266,7 +266,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   break;
                 }
                 claimData = claimRef.data();
-                receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                receipt = identity.addClaim(web3, 4, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                 console.log(`Mined in block ${receipt.blockNumber}`);
                 //db.collection("users").doc(phoneNumber).collection('newClaims').doc('DrivingLicense').delete()
                 utils.deleteSession(db, sessionIdStr);
@@ -286,7 +286,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   break;
                 }
                 claimData = claimRef.data();
-                receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                receipt = identity.addClaim(web3, 5, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                 console.log(`Mined in block ${receipt.blockNumber}`);
                 //db.collection("users").doc(phoneNumber).collection('newClaims').doc('CovidVaccine').delete()
                 utils.deleteSession(db, sessionIdStr);
@@ -309,7 +309,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
                   break;
                 }
                 claimData = claimRef.data();
-                receipt = identity.addClaim(web3, 2, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
+                receipt = identity.addClaim(web3, 6, 1, claimData.issuer, claimData.signature, claimData.data, claimData.uri, idContract, signer)
                 console.log(`Mined in block ${receipt.blockNumber}`);
                 //db.collection("users").doc(phoneNumber).collection('newClaims').doc('Passport').delete()
                 utils.deleteSession(db, sessionIdStr);
@@ -438,10 +438,10 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
           var presRef = db.collection("public").doc(phoneNumber).collection("claims").doc(text_array[2]);
           presRef.get().then(function (doc) {
             if (doc.exists) {
-              presData = doc.data().text_array
+              presData = doc.data()
               presRef.delete().then(() => {
                 console.log("Document successfully deleted!");
-                response = `END Claim ${presData} is no longer being presented`;
+                response = `END Claim is no longer being presented`;
                 utils.deleteSession(db, sessionIdStr);
                 res.set("Content-Type: text/plain");
                 res.send(response);
@@ -453,7 +453,7 @@ async function checkSession(fs, db, sessionIdStr, serviceCode, phoneNumber, text
             }
 
           })
-        break;
+          break;
 
 
       }
